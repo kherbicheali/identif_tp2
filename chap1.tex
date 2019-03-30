@@ -40,8 +40,58 @@
 	
 
 \section{\textsc{Identification par les moindres carrés récursifs}}
-\subsection{\textsc{ Principe et ... }}
+\subsection{\textsc{ Principe et erreur de prédiction }}
 
 	\paragraph{} L'algorithme des moindres carrés récursifs se compose de deux parties, partie initialisation et partie calcul itératif des parmaètres. Il existe deux solutions pour initialiser cet algorithme, soit avec un choix arbitraire des paramètres ou bien de faire un petit prélévement des mesures donc celles du fichier ZT. Dans notre cas on se penchera plus tôt sur la deuxième option c'est à dire on prélève un nombre de mesures $N_0$ qui est égale dans notre cas à $3$ puis en utilisant les moindres carrés basiques on poura facilement trouver la matrice de régression $\phi_0$ ainsi que les paramètres $P_0$ et la matrice $A_0$ qui est égale à $\phi^{T}_{0} \phi_0$.\\
-Le calcul itératif des paramètres consiste à acquérir à chaque itération une nouvelle mesure $y_{N+1}$, de calculer son $y_{MOD_{N+1}} = \varphi^{T}_{N+1} \hat{P}_N$
-, \label{section 1.3.1} \hyperref[Annexe B] {voir code Matlab en annexe}. 
+Le calcul itératif des paramètres consiste à acquérir à chaque itération une nouvelle mesure $y_{N+1}$, de calculer son $y_{MOD_{N+1}} = \varphi^{T}_{N+1} \hat{P}_N$, ainsi que la matrice récursive  $A^{-1}_{N+1}$ avec la relation : $A^{-1}_{N+1} = A^{-1}_{N} - K_{N+1}\varphi^{T}_{N+1} A^{-1}_{N} $ ou $K_{N+1} = \frac{ A^{-1}_{N}\varphi_{N+1} }{ 1+\varphi^{T}_{N+1} A^{-1}_{N} \varphi_{N+1}  }$. Pour arriver enfin à exprimer $\hat{P}_{N+1} $ en fonction de $\hat{P}_N$ comme suit :  $\hat{P}_{N+1} = \hat{P}_N + K_{N+1} (y_{N+1} - y_{MOD_{N+1}}) $
+, \label{section 1.3.1} \hyperref[Annexe B] {voir code Matlab en annexe}. \\
+
+	\par L'erreur de prédiction équivaut à $ y_{N+1} - y_{MOD_{N+1}} $ qui évolue à chaque itération, quand cette dernière augmente en valeur ça explique que l'écart entre l'evolution réelle $y_{N+1}$ et l'évolution modélisée $y_{MOD_{N+1}}$ augmente, lorsque l'erreur de prédiction arrive à un seuil donné il vaut mieux prévoir de stopper l'estimation et de faire une seconde modélisation afin d'être toujours proche de la réalité car on fait face à ce qu'on appelle l'instant de commutation.\\    
+
+	\begin{center}
+	\includegraphics[scale=0.5]{MCrecu.PNG}
+	\captionof{figure}{\textit{Tracé des droites modélisées par les MC récursifs superposé avec celui des données\\}}
+	\label{fig4} 
+	\end{center}
+	
+	\textbf{Nota:} La figure ci-dessus est tracée en prenant en compte l'instant de commutation trouvé précédemment c'est-à-dire à $i=417$.\\ 
+	
+\subsection{\textsc{ Reconstruction d'un mur avec utilisation de l'erreur de prédiction }}
+
+	\paragraph{} On suppose que le nombre de murs présents est \textbf{2}, on fixe le sueil de l'erreur de prédiction à \textbf{4}. Il suffit de prendre le code précédent et de lui ajouter une condition d'arrêt, \label{section 1.3.2} \hyperref[Annexe C] {voir code Matlab en annexe}. \\
+  
+  \begin{center}
+	\includegraphics[scale=0.5]{3_b.PNG}
+	\captionof{figure}{\textit{Tracé d'une droite modélisée par les MC récursifs avec utilisation de l'erreur de prédiction superposé avec celui des données\\}}
+	\label{fig5} 
+	\end{center}
+	
+\subsection{\textsc{ Reconstruction d'un mur avec utilisation de l'erreur de prédiction pendant un nombre d'itérations NITER}}
+  
+  \paragraph{} Afin d'éviter toutes les anomalies qui peuvent bruiter ou perturber les mesures, la prolongation de l'erreur de prédiction sur un nombre NITER d'itérations semble être une bonne solution.\\
+  Après plusieurs tests $NITER = 88$ apporte la meilleure approche possible, \label{section 1.3.3} \hyperref[Annexe D] {voir code Matlab en annexe}. \\
+  
+	\begin{center}
+	\includegraphics[scale=0.5]{NITER.PNG}
+	\captionof{figure}{\textit{Tracé des droites modélisées par les MC récursifs avec utilisation de l'erreur de prédiction pendant NITER itérations superposé avec celui des données\\}}
+	\label{fig6} 
+	\end{center}
+   
+   \par \textbf{Conclusion :} Avec cette méthode, la détection de l'instant de commutation se fera automatiquement pour un nombre de murs connus par avance mais qui est impossible pour $n$ murs inconnus.\\
+      
+\subsection{\textsc{ Reconstruction des murs avec initialisation arbitraire de l'algorithme}}
+
+	\paragraph{} On initialise d'abord les paramètres $P_0$ arbitrairement, de même pour la matrice $A_0$ qui doit s'écrire comme suit : $A_0 = C*Id$, avec $C$ une constante de grande valeur $10^{6}$ dans notre cas et $Id$ une matrice identité $2$x$2$ dans notre cas puisqu'on a $2$ paramètres, \label{section 1.3.4} \hyperref[Annexe E] {voir code Matlab en annexe}. \\
+	
+		\begin{center}
+	\includegraphics[scale=0.5]{E.PNG}
+	\captionof{figure}{\textit{Tracé des droites modélisées par les MC récursifs avec initialisation arbitraire des paramètres superposé avec celui des données\\}}
+	\label{fig7} 
+	\end{center}
+	   
+	\textbf{Nota:} Cette méthode est moins précise que sa précédente vu qu'on initialise arbitrairement $A_0$.	   
+	   
+\subsection{\textsc{ Conclusion }}
+
+	On pense que l'algorithme précédent doit être mis sous forme d'une fonction qui sera appelée à chaque détection d'un instant de commutation.
+	  
